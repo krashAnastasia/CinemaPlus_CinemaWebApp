@@ -698,6 +698,20 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 TrailerPath = sharedTrailerPath,
                 AvailabilityDate = new DateOnly(2026, 11, 1),
                 AvailabilityStatus = "ComingSoon"
+            },
+            new Film
+            {
+                Id = 18,
+                Title = "Люди в чорному",
+                Genre = "Фантастика",
+                DurationMinutes = 98,
+                Description = "Таємна організація захищає Землю від міжгалактичних загроз, а новачок проходить випробування у світі прибульців і великих секретів.",
+                ReleaseYear = 1997,
+                AgeRestriction = "12+",
+                PosterPath = "/source/logo-white.png",
+                TrailerPath = sharedTrailerPath,
+                AvailabilityDate = new DateOnly(2026, 7, 12),
+                AvailabilityStatus = "NowShowing"
             }
         ];
     }
@@ -783,10 +797,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             new SessionSlot(2, 13, 50, 180m),
             new SessionSlot(3, 18, 30, 220m)
         ]);
-        AddRecurringSessions(sessions, nextId, 13, [7, 10, 13, 16, 19, 22, 25, 28], [
+        nextId = AddRecurringSessions(sessions, nextId, 13, [7, 10, 13, 16, 19, 22, 25, 28], [
             new SessionSlot(1, 10, 50, 210m),
             new SessionSlot(2, 15, 40, 250m),
             new SessionSlot(3, 20, 25, 300m)
+        ]);
+        AddRecurringSessions(sessions, nextId, 18, [8, 11, 14, 17, 20, 23, 26, 29], [
+            new SessionSlot(1, 10, 5, 175m),
+            new SessionSlot(2, 14, 55, 215m),
+            new SessionSlot(3, 19, 35, 255m)
         ]);
 
         return sessions;
