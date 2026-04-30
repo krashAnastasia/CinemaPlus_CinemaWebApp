@@ -1,0 +1,105 @@
+@model ProfileViewModel
+@{
+    ViewData["Title"] = "Кабінет";
+}
+
+<section class="profile-page">
+    <div class="profile-container">
+        <div class="profile-header">
+            <h1>МІЙ КАБІНЕТ</h1>
+            <span class="bonus-pill">@Model.BonusLabel</span>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+        {
+            <div class="form-validation-summary profile-page__status-message">
+                <p>@Model.StatusMessage</p>
+            </div>
+        }
+
+        <div class="profile-top">
+            <div class="profile-info" id="profile-card">
+                <div class="avatar-wrapper">
+                    @if (!Model.UseDefaultProfilePhoto && !string.IsNullOrWhiteSpace(Model.ProfilePhotoPath))
+                    {
+                        <img src="@Model.ProfilePhotoPath" alt="@Model.FullName" class="profile-photo" />
+                    }
+                    else
+                    {
+                        <div class="profile-photo profile-photo--placeholder" aria-label="Фото профілю">
+                            <i class="fa-solid fa-circle-user"></i>
+                        </div>
+                    }
+                    <a href="#profile-card" class="icon-btn avatar-edit" aria-label="Перейти до даних профілю">
+                        <i class="fa-solid fa-pen"></i>
+                    </a>
+                </div>
+
+                <article class="profile-card">
+                    <a href="#profile-card" class="icon-btn card-edit" aria-label="Переглянути дані профілю">
+                        <i class="fa-solid fa-pen"></i>
+                    </a>
+                    <h2>@Model.FullName</h2>
+                    <p class="profile-meta">@Model.Email</p>
+                    <p class="profile-meta">@Model.Phone</p>
+                </article>
+            </div>
+
+            <div class="profile-actions">
+                <a href="#profile-tickets" class="pill-btn secondary-btn">МОЇ БІЛЕТИ</a>
+                <a href="#profile-card" class="pill-btn secondary-btn">ДАНІ ПРОФІЛЮ</a>
+            </div>
+        </div>
+
+        <section class="tickets-section" id="profile-tickets">
+            <h2>МОЇ БІЛЕТИ</h2>
+
+            @if (Model.Tickets.Count == 0)
+            {
+                <p class="shell-placeholder">У вашому кабінеті ще немає придбаних квитків.</p>
+            }
+            else
+            {
+                <div class="profile-tickets-grid">
+                    @foreach (var ticket in Model.Tickets)
+                    {
+                        <article class="profile-ticket-card">
+                            <div class="profile-ticket-card__poster-wrap">
+                                <img src="@ticket.PosterPath" alt="@ticket.MovieTitle" class="profile-ticket-card__poster">
+                                <div class="profile-ticket-card__overlay">
+                                    <h3 class="profile-ticket-card__title">@ticket.MovieTitle</h3>
+                                    <div class="profile-ticket-card__meta">
+                                        <span>@ticket.DateText</span>
+                                        <span>@ticket.TimeText</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p class="profile-ticket-card__status @(ticket.IsCancelled ? "profile-ticket-card__status--cancelled" : null)">@ticket.StatusText</p>
+                            <p class="profile-ticket-card__seats">@ticket.SeatSummaryText.ToUpper(CinemaPresentationHelper.UkrainianCulture)</p>
+
+                            <div class="profile-ticket-card__actions">
+                                @if (ticket.CanCancel)
+                                {
+                                    <form asp-controller="Profile" asp-action="CancelBooking" asp-route-bookingId="@ticket.BookingId" method="post">
+                                        <button type="submit" class="button-light profile-ticket-card__button">ПОВЕРНУТИ</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="button-light profile-ticket-card__button profile-ticket-card__button--disabled">СКАСОВАНО</span>
+                                }
+
+                                <a asp-controller="Tickets" asp-action="Details" asp-route-id="@ticket.BookingId" class="button-primary profile-ticket-card__button">ДЕТАЛІ</a>
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+        </section>
+
+        <div class="back-button-wrapper">
+            <a asp-controller="Home" asp-action="Index" class="btn-back">НА ГОЛОВНУ</a>
+        </div>
+    </div>
+</section>

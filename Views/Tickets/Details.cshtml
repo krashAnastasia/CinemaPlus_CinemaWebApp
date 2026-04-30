@@ -1,0 +1,114 @@
+@model TicketConfirmationViewModel
+@using System.Globalization
+@{
+    ViewData["Title"] = "Підтвердження замовлення";
+}
+
+<main class="ticket-confirmation-page">
+    <section class="ticket-confirmation-page__container" aria-labelledby="ticket-confirmation-heading">
+        <div class="ticket-confirmation-page__layout">
+            <div class="ticket-confirmation-page__left">
+                <article class="ticket-card" aria-label="Квиток на сеанс">
+                    <div class="ticket-card__header">
+                        <div class="ticket-card__poster">
+                            <img src="@Model.PosterPath" alt="@Model.MovieTitle poster">
+                        </div>
+
+                        <div class="ticket-card__movie-info">
+                            <h2 class="ticket-card__title">@Model.MovieTitle</h2>
+
+                            <div class="ticket-card__meta">
+                                <p>@Model.DurationMinutes хв.</p>
+                                <p>@Model.Genre</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ticket-card__info-grid">
+                        <div class="ticket-card__info-block">
+                            <span class="ticket-card__icon" aria-hidden="true"><i class="fa-regular fa-calendar"></i></span>
+                            <div>
+                                <p>@Model.DateText</p>
+                                <p>@Model.TimeText</p>
+                            </div>
+                        </div>
+
+                        <div class="ticket-card__info-block">
+                            <span class="ticket-card__icon" aria-hidden="true"><i class="fa-solid fa-chair"></i></span>
+                            <div>
+                                <p>@Model.TicketSeatLinePrimary</p>
+                                <p>@Model.TicketSeatLineSecondary</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ticket-card__price-row">
+                        <span class="ticket-card__icon" aria-hidden="true"><i class="fa-solid fa-money-bill-wave"></i></span>
+                        <p>@Model.TotalPrice.ToString("0.00", CultureInfo.InvariantCulture) грн</p>
+                    </div>
+
+                    <div class="ticket-card__location-row">
+                        <span class="ticket-card__icon" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>
+                        <div>
+                            <p>@Model.HallName (@Model.Technology)</p>
+                            <p>вул. Кінематографічна, 5, м. Харків</p>
+                        </div>
+                    </div>
+
+                    <div class="ticket-card__note-row">
+                        <span class="ticket-card__icon" aria-hidden="true"><i class="fa-regular fa-file-lines"></i></span>
+                        <p>Покажіть цей QR-код на вході в кінозал</p>
+                    </div>
+
+                    <div class="ticket-card__dashed-divider" aria-hidden="true"></div>
+
+                    <div class="ticket-card__barcode">
+                        <img src="@Model.QrCodeDataUri" alt="QR-код квитка">
+                    </div>
+
+                    <p class="ticket-card__ticket-code">КОД КВИТКА: @Model.TicketCode</p>
+                    <p class="ticket-card__order-number">НОМЕР ЗАМОВЛЕННЯ: @Model.OrderNumber</p>
+                </article>
+
+                <a
+                    asp-controller="Tickets"
+                    asp-action="Pdf"
+                    asp-route-id="@Model.BookingId"
+                    asp-route-ticketCode="@(Model.RequiresGuestTicketCode ? Model.AccessTicketCode : null)"
+                    class="button-light ticket-confirmation-page__download-button">ЗАВАНТАЖИТИ КВИТОК</a>
+            </div>
+
+            <div class="ticket-confirmation-page__right">
+                <div class="ticket-confirmation-page__message">
+                    <h1 id="ticket-confirmation-heading">ДЯКУЄМО ЗА ВАШЕ ЗАМОВЛЕННЯ!</h1>
+                    <p>оплата пройшла успішно</p>
+                </div>
+
+                <div class="ticket-confirmation-page__summary">
+                    <h2>@Model.MovieTitle</h2>
+                    <p>КІЛЬКІСТЬ: @Model.Quantity</p>
+                    <p>ДАТА: @Model.DateText</p>
+                    <p>СЕАНС: @Model.TimeText</p>
+                    <p>ЗАЛ: @Model.HallName (@Model.Technology)</p>
+                    <p>@Model.SeatSummaryText.ToUpper(CinemaPresentationHelper.UkrainianCulture)</p>
+                    <p>EMAIL: @Model.CustomerEmail</p>
+                    <p>ВАРТІСТЬ: @Model.TotalPrice.ToString("0.00", CultureInfo.InvariantCulture) грн</p>
+                    <p class="ticket-confirmation-page__ticket-code-right">КОД КВИТКА: @Model.TicketCode</p>
+
+                    <p class="ticket-confirmation-page__order-number-right">
+                        НОМЕР ЗАМОВЛЕННЯ: @Model.OrderNumber
+                    </p>
+                </div>
+
+                <div class="ticket-confirmation-page__secondary-actions">
+                    <a asp-controller="Home" asp-action="Return" class="button-outline">ПОВЕРНУТИ КВИТОК</a>
+                    <a asp-controller="Home" asp-action="Faq" class="button-light">FAQ</a>
+                </div>
+
+                <div class="ticket-confirmation-page__primary-action">
+                    <a asp-controller="Home" asp-action="Index" class="button-primary">НА ГОЛОВНУ</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

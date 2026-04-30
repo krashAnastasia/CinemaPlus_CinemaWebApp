@@ -1,0 +1,175 @@
+@model CheckoutSelectionViewModel
+@using System.Globalization
+@{
+    ViewData["Title"] = "Оформлення замовлення";
+}
+
+<section class="ticket-checkout-page">
+    <div class="ticket-checkout-page__container">
+        <div class="ticket-checkout-page__content">
+            <h1 class="ticket-checkout-page__page-title">ОФОРМЛЕННЯ ЗАМОВЛЕННЯ</h1>
+
+            <div class="ticket-checkout-page__layout">
+                <aside class="ticket-checkout-page__poster-column">
+                    <div class="ticket-checkout-page__poster">
+                        <img src="@Model.PosterPath" alt="@Model.MovieTitle poster">
+                    </div>
+                </aside>
+
+                <div class="ticket-checkout-page__main-column">
+                    <section class="ticket-checkout-page__movie-info">
+                        <h2 class="ticket-checkout-page__movie-title">@Model.MovieTitle</h2>
+
+                        <div class="ticket-checkout-page__meta">
+                            <p>Жанр: @Model.Genre</p>
+                            <p>Тривалість: @Model.DurationMinutes хв</p>
+                            <p>Вікове обмеження: @Model.AgeRestriction</p>
+                            <p>Мова: укр. дубляж</p>
+                        </div>
+                    </section>
+
+                    <form asp-controller="Checkout" asp-action="Index" method="post">
+                        <input asp-for="SessionId" type="hidden">
+
+                        @foreach (var seatId in Model.SelectedSeatIds)
+                        {
+                            <input type="hidden" name="SelectedSeatIds" value="@seatId">
+                        }
+
+                        <div asp-validation-summary="ModelOnly" class="form-validation-summary"></div>
+
+                        <div class="ticket-checkout-page__details-row">
+                            <section class="ticket-checkout-page__order-details">
+                                <h3 class="ticket-checkout-page__section-title">ДЕТАЛІ ЗАМОВЛЕННЯ</h3>
+                                <p>КІЛЬКІСТЬ: @Model.Quantity</p>
+                                <p>ДАТА: @Model.DateText</p>
+                                <p>СЕАНС: @Model.TimeText</p>
+                                <p>ЗАЛ: @Model.HallName</p>
+                                <p>@Model.SeatSummaryText.ToUpper(CinemaPresentationHelper.UkrainianCulture)</p>
+                                <p>ДО СПЛАТИ: @Model.TotalPrice.ToString("0.00", CultureInfo.InvariantCulture) грн</p>
+                            </section>
+
+                            <section class="ticket-checkout-page__user-card">
+                                <div class="ticket-checkout-page__user-card-header">
+                                    <h3 class="ticket-checkout-page__section-title">МОЇ ДАНІ:</h3>
+                                    @if (Model.IsAuthenticatedUser)
+                                    {
+                                        <button
+                                            class="ticket-checkout-page__edit-button"
+                                            aria-label="Редагувати дані"
+                                            aria-expanded="@(Model.ProfileEditorOpen ? "true" : "false")"
+                                            type="button"
+                                            data-checkout-profile-toggle>
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                    }
+                                </div>
+                                <div class="ticket-checkout-page__user-box">
+                                    @if (Model.IsAuthenticatedUser)
+                                    {
+                                        <input asp-for="ProfileEditorOpen" type="hidden" data-checkout-profile-state>
+
+                                        <div class="ticket-checkout-page__user-display" data-checkout-profile-display @(Model.ProfileEditorOpen ? "hidden" : null)>
+                                            <p class="ticket-checkout-page__user-name">@Model.FullName</p>
+                                            <p>@Model.Email</p>
+                                            <p>@Model.Phone</p>
+                                            <p class="ticket-checkout-page__user-note">Дані профілю можна уточнити перед оплатою.</p>
+                                        </div>
+
+                                        <div class="ticket-checkout-page__user-edit-fields" data-checkout-profile-editor @(!Model.ProfileEditorOpen ? "hidden" : null)>
+                                            <div class="checkout-user-field">
+                                                <label asp-for="FullName">Ім'я та прізвище</label>
+                                                <input asp-for="FullName" class="checkout-user-input" placeholder="Ім'я та прізвище">
+                                                <span asp-validation-for="FullName" class="form-field-error"></span>
+                                            </div>
+
+                                            <div class="checkout-user-field">
+                                                <label asp-for="Phone">Номер телефону</label>
+                                                <input asp-for="Phone" class="checkout-user-input" placeholder="+380XXXXXXXXX">
+                                                <span asp-validation-for="Phone" class="form-field-error"></span>
+                                            </div>
+
+                                            <p class="ticket-checkout-page__user-note">Електронну адресу можна змінити нижче в блоці оплати.</p>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="checkout-user-field">
+                                            <label asp-for="FullName">Ім'я та прізвище</label>
+                                            <input asp-for="FullName" class="checkout-user-input" placeholder="Ім'я та прізвище">
+                                            <span asp-validation-for="FullName" class="form-field-error"></span>
+                                        </div>
+
+                                        <div class="checkout-user-field">
+                                            <label asp-for="Phone">Номер телефону</label>
+                                            <input asp-for="Phone" class="checkout-user-input" placeholder="+380XXXXXXXXX">
+                                            <span asp-validation-for="Phone" class="form-field-error"></span>
+                                        </div>
+
+                                    }
+                                </div>
+                            </section>
+                        </div>
+
+                        <section class="ticket-checkout-page__payment">
+                            <h3 class="ticket-checkout-page__section-title">ОПЛАТА</h3>
+
+                            <div class="payment-form">
+                                <div class="payment-form__field payment-form__field--full">
+                                    <label asp-for="Email">Електронна адреса</label>
+                                    <input asp-for="Email" id="checkout-email" placeholder="Електронна адреса">
+                                    <span asp-validation-for="Email" class="form-field-error"></span>
+                                </div>
+
+                                <div class="payment-form__field payment-form__field--full payment-form__field--card">
+                                    <label asp-for="CardNumber">Номер карти</label>
+                                    <div class="payment-form__input-with-icon">
+                                        <input asp-for="CardNumber" id="card-number" inputmode="numeric" autocomplete="cc-number" placeholder="1234 1234 1234 1234">
+                                        <span class="payment-form__card-icons">VISA MC</span>
+                                    </div>
+                                    <span asp-validation-for="CardNumber" class="form-field-error"></span>
+                                </div>
+
+                                <div class="payment-form__row">
+                                    <div class="payment-form__field">
+                                        <label asp-for="CardExpiry">Гідна до</label>
+                                        <input asp-for="CardExpiry" id="card-exp" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/YY">
+                                        <span asp-validation-for="CardExpiry" class="form-field-error"></span>
+                                    </div>
+
+                                    <div class="payment-form__field payment-form__field--cvc">
+                                        <label asp-for="CardCvc">CVC</label>
+                                        <div class="payment-form__input-with-icon">
+                                            <input asp-for="CardCvc" id="card-cvc" inputmode="numeric" autocomplete="cc-csc" placeholder="CVC">
+                                            <span class="payment-form__cvc-icon" aria-hidden="true">◔</span>
+                                        </div>
+                                        <span asp-validation-for="CardCvc" class="form-field-error"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="apple-pay-button" type="submit" aria-label="Apple Pay" name="PaymentMethod" value="ApplePay">
+                                <span class="apple-pay-button__content">
+                                    <span class="apple-pay-button__logo"></span>
+                                    <span class="apple-pay-button__text">Pay</span>
+                                </span>
+                            </button>
+
+                            <div class="ticket-checkout-page__actions">
+                                <a asp-controller="Sessions" asp-action="Seats" asp-route-sessionId="@Model.SessionId" class="button-outline">НАЗАД</a>
+                                @if (Model.CanSubmit)
+                                {
+                                    <button type="submit" class="button-primary" name="PaymentMethod" value="Card">ОПЛАТИТИ</button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="button-primary" disabled>ОПЛАТИТИ</button>
+                                }
+                            </div>
+                        </section>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

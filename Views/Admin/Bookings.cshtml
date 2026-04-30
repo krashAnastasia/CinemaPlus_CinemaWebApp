@@ -1,0 +1,142 @@
+@model AdminBookingListViewModel
+@{
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <h1 class="mb-0">Бронювання</h1>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="alert alert-success" role="status">@Model.StatusMessage</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+    }
+
+    <form method="get" asp-controller="Admin" asp-action="Bookings" class="row g-3 align-items-end mb-4">
+        <div class="col-12 col-md-4">
+            <label for="q" class="form-label">Пошук (клієнт або email)</label>
+            <input id="q" name="q" value="@Model.SearchQuery" class="form-control" placeholder="Ім'я або email" />
+        </div>
+
+        <div class="col-6 col-md-2">
+            <label for="mode" class="form-label">Режим</label>
+            <select id="mode" name="mode" class="form-select">
+                <option value="partial" selected="@(Model.SearchMode == "partial" ? "selected" : null)">Частковий збіг</option>
+                <option value="exact" selected="@(Model.SearchMode == "exact" ? "selected" : null)">Точний збіг</option>
+            </select>
+        </div>
+
+        <div class="col-6 col-md-2">
+            <label for="status" class="form-label">Статус</label>
+            <select id="status" name="status" class="form-select">
+                <option value="">Усі</option>
+                @foreach (var status in Model.AvailableStatuses)
+                {
+                    <option value="@status" selected="@(Model.StatusFilter == status ? "selected" : null)">@(status == "Cancelled" ? "Скасовано" : status == "Paid" ? "Оплачено" : status)</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-6 col-md-2">
+            <label for="sortBy" class="form-label">Сортувати за</label>
+            <select id="sortBy" name="sortBy" class="form-select">
+                <option value="booking_date" selected="@(Model.SortBy == "booking_date" ? "selected" : null)">Час бронювання</option>
+                <option value="seats" selected="@(Model.SortBy == "seats" ? "selected" : null)">Кількість місць</option>
+                <option value="customer_name" selected="@(Model.SortBy == "customer_name" ? "selected" : null)">Клієнт</option>
+                <option value="session_time" selected="@(Model.SortBy == "session_time" ? "selected" : null)">Дата сеансу</option>
+                <option value="status" selected="@(Model.SortBy == "status" ? "selected" : null)">Статус</option>
+                <option value="total_price" selected="@(Model.SortBy == "total_price" ? "selected" : null)">Сума</option>
+                <option value="id" selected="@(Model.SortBy == "id" ? "selected" : null)">ID</option>
+            </select>
+        </div>
+
+        <div class="col-6 col-md-2">
+            <label for="sortDir" class="form-label">Напрям</label>
+            <select id="sortDir" name="sortDir" class="form-select">
+                <option value="asc" selected="@(Model.SortDir == "asc" ? "selected" : null)">За зростанням</option>
+                <option value="desc" selected="@(Model.SortDir == "desc" ? "selected" : null)">За спаданням</option>
+            </select>
+        </div>
+
+        <div class="col-12 col-md-auto d-flex gap-2">
+            <button type="submit" class="btn btn-dark">ЗАСТОСУВАТИ</button>
+            <a asp-controller="Admin" asp-action="Bookings" class="btn btn-outline-secondary">СКИНУТИ</a>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Клієнт</th>
+                    <th>Сеанс</th>
+                    <th>Місця</th>
+                    <th>Статус</th>
+                    <th>Дата бронювання</th>
+                    <th>Сума</th>
+                    <th>Дії</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Bookings.Count == 0)
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">Бронювання за вибраними параметрами не знайдено.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var booking in Model.Bookings)
+                    {
+                        <tr>
+                            <td>@booking.Id</td>
+                            <td>
+                                <div class="fw-semibold">@booking.CustomerName</div>
+                                <div class="small text-muted">@booking.CustomerEmail</div>
+                                @if (!string.IsNullOrWhiteSpace(booking.CustomerPhone))
+                                {
+                                    <div class="small text-muted">@booking.CustomerPhone</div>
+                                }
+                            </td>
+                            <td>
+                                <div class="fw-semibold">Сеанс #@booking.SessionId</div>
+                                <div class="small text-muted">@booking.SessionSummary</div>
+                            </td>
+                            <td>
+                                <div>@booking.SeatSummary</div>
+                                <div class="small text-muted">Усього місць: @booking.SeatsCount</div>
+                            </td>
+                            <td>
+                                <span class="badge @(booking.Status == "Cancelled" ? "text-bg-secondary" : "text-bg-success")">
+                                    @(booking.Status == "Cancelled" ? "Скасовано" : booking.Status == "Paid" ? "Оплачено" : booking.Status)
+                                </span>
+                            </td>
+                            <td>@booking.BookingDate.ToString("dd.MM.yyyy HH:mm", CinemaPresentationHelper.UkrainianCulture)</td>
+                            <td>@booking.TotalPrice.ToString("0.00", CinemaPresentationHelper.UkrainianCulture) грн</td>
+                            <td class="text-nowrap">
+                                <a asp-controller="Tickets" asp-action="Details" asp-route-id="@booking.Id" class="btn btn-sm btn-outline-primary me-1" title="Квиток">
+                                    <i class="fa-solid fa-ticket"></i>
+                                </a>
+                                @if (booking.CanCancel)
+                                {
+                                    <form asp-controller="Admin" asp-action="CancelBooking" asp-route-id="@booking.Id" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Скасувати" onclick="return confirm('Ви впевнені, що хочете скасувати це бронювання?');">
+                                            <i class="fa-solid fa-ban"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

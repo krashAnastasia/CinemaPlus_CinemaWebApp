@@ -1,0 +1,247 @@
+@model AdminFilmFormViewModel
+@{
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <h1 class="mb-0">@Model.PageTitle</h1>
+        <a asp-controller="Admin" asp-action="Films" class="btn btn-outline-secondary">До списку фільмів</a>
+    </div>
+
+    <form asp-controller="Admin" asp-action="@Model.FormAction" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data" novalidate>
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label">Назва</label>
+                            <input asp-for="Title" class="form-control" />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="Genre" class="form-label">Жанр</label>
+                                <input asp-for="Genre" class="form-control" />
+                                <span asp-validation-for="Genre" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="AgeRestriction" class="form-label">Вікове обмеження</label>
+                                <input asp-for="AgeRestriction" class="form-control" placeholder="12+" />
+                                <span asp-validation-for="AgeRestriction" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="DurationMinutes" class="form-label">Тривалість (хв)</label>
+                                <input asp-for="DurationMinutes" class="form-control" type="number" />
+                                <span asp-validation-for="DurationMinutes" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ReleaseYear" class="form-label">Рік випуску</label>
+                                <input asp-for="ReleaseYear" class="form-control" type="number" />
+                                <span asp-validation-for="ReleaseYear" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="AvailabilityStatus" class="form-label">Статус показу</label>
+                                <select asp-for="AvailabilityStatus" class="form-select">
+                                    <option value="NowShowing">У КІНО</option>
+                                    <option value="ComingSoon">СКОРО</option>
+                                </select>
+                                <span asp-validation-for="AvailabilityStatus" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="AvailabilityDate" class="form-label">Дата доступності</label>
+                                <input asp-for="AvailabilityDate" class="form-control" type="date" />
+                                <span asp-validation-for="AvailabilityDate" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <label asp-for="Description" class="form-label">Опис</label>
+                            <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="h5 mb-3">Постер</h2>
+                        <div class="border rounded p-3 bg-light">
+                            <img
+                                src="@(string.IsNullOrWhiteSpace(Model.CurrentPosterPath) ? "/source/hero-img.jpg" : Model.CurrentPosterPath)"
+                                alt="Поточний постер"
+                                class="img-fluid rounded mb-3"
+                                style="width:100%;max-height:360px;object-fit:cover;"
+                                data-poster-preview />
+
+                            <div class="border border-2 border-secondary-subtle rounded p-4 text-center bg-white"
+                                 data-drop-zone>
+                                <p class="fw-semibold mb-2">Перетягніть постер сюди</p>
+                                <p class="text-muted small mb-3">або оберіть JPG, PNG чи WebP файл</p>
+                                <input asp-for="PosterFile" class="form-control" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-poster-input />
+                            </div>
+                            <span asp-validation-for="PosterFile" class="text-danger small d-block mt-2"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mt-3">
+                    <div class="card-body">
+                        <h2 class="h5 mb-3">Трейлер</h2>
+                        <div class="border rounded p-3 bg-light">
+                            @if (Model.HasCurrentTrailer)
+                            {
+                                <video
+                                    class="w-100 rounded mb-3 bg-dark"
+                                    style="max-height:260px;"
+                                    poster="@Model.CurrentPosterPath"
+                                    controls
+                                    preload="metadata"
+                                    data-trailer-preview>
+                                    <source src="@Model.CurrentTrailerPath" />
+                                </video>
+                            }
+                            else
+                            {
+                                <video
+                                    class="w-100 rounded mb-3 bg-dark"
+                                    style="max-height:260px;"
+                                    poster="@Model.CurrentPosterPath"
+                                    controls
+                                    preload="metadata"
+                                    hidden
+                                    data-trailer-preview></video>
+                            }
+
+                            <div class="rounded p-3 mb-3 bg-white border text-muted small @(Model.HasCurrentTrailer ? "d-none" : string.Empty)" data-trailer-empty-state>
+                                Трейлер ще не завантажено. За потреби можна додати MP4, MOV, WebM або OGV файл.
+                            </div>
+
+                            <div class="border border-2 border-secondary-subtle rounded p-4 text-center bg-white"
+                                 data-trailer-drop-zone>
+                                <p class="fw-semibold mb-2">Перетягніть трейлер сюди</p>
+                                <p class="text-muted small mb-3">або оберіть MP4, MOV, WebM чи OGV файл</p>
+                                <input asp-for="TrailerFile" class="form-control" accept=".mp4,.mov,.webm,.ogv,video/mp4,video/quicktime,video/webm,video/ogg" data-trailer-input />
+                            </div>
+                            <span asp-validation-for="TrailerFile" class="text-danger small d-block mt-2"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mt-3">
+                    <button type="submit" class="btn btn-dark">@Model.SubmitButtonText</button>
+                    <a asp-controller="Admin" asp-action="Films" class="btn btn-outline-secondary">Скасувати</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        (() => {
+            const input = document.querySelector('[data-poster-input]');
+            const preview = document.querySelector('[data-poster-preview]');
+            const dropZone = document.querySelector('[data-drop-zone]');
+            const trailerInput = document.querySelector('[data-trailer-input]');
+            const trailerPreview = document.querySelector('[data-trailer-preview]');
+            const trailerDropZone = document.querySelector('[data-trailer-drop-zone]');
+            const trailerEmptyState = document.querySelector('[data-trailer-empty-state]');
+
+            if (!input || !preview || !dropZone) {
+                return;
+            }
+
+            const renderFile = (file) => {
+                if (!file || !file.type.startsWith('image/')) {
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    preview.src = event.target?.result ?? preview.src;
+                };
+                reader.readAsDataURL(file);
+            };
+
+            input.addEventListener('change', () => {
+                renderFile(input.files?.[0]);
+            });
+
+            ['dragenter', 'dragover'].forEach((eventName) => {
+                dropZone.addEventListener(eventName, (event) => {
+                    event.preventDefault();
+                    dropZone.classList.add('border-dark');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach((eventName) => {
+                dropZone.addEventListener(eventName, (event) => {
+                    event.preventDefault();
+                    dropZone.classList.remove('border-dark');
+                });
+            });
+
+            dropZone.addEventListener('drop', (event) => {
+                const file = event.dataTransfer?.files?.[0];
+                if (!file) {
+                    return;
+                }
+
+                const transfer = new DataTransfer();
+                transfer.items.add(file);
+                input.files = transfer.files;
+                renderFile(file);
+            });
+
+            const renderTrailer = (file) => {
+                if (!trailerPreview || !trailerEmptyState || !file || !file.type.startsWith('video/')) {
+                    return;
+                }
+
+                const objectUrl = URL.createObjectURL(file);
+                trailerPreview.hidden = false;
+                trailerEmptyState.hidden = true;
+                trailerPreview.src = objectUrl;
+                trailerPreview.load();
+            };
+
+            if (trailerInput && trailerDropZone && trailerPreview && trailerEmptyState) {
+                trailerInput.addEventListener('change', () => {
+                    renderTrailer(trailerInput.files?.[0]);
+                });
+
+                ['dragenter', 'dragover'].forEach((eventName) => {
+                    trailerDropZone.addEventListener(eventName, (event) => {
+                        event.preventDefault();
+                        trailerDropZone.classList.add('border-dark');
+                    });
+                });
+
+                ['dragleave', 'drop'].forEach((eventName) => {
+                    trailerDropZone.addEventListener(eventName, (event) => {
+                        event.preventDefault();
+                        trailerDropZone.classList.remove('border-dark');
+                    });
+                });
+
+                trailerDropZone.addEventListener('drop', (event) => {
+                    const file = event.dataTransfer?.files?.[0];
+                    if (!file) {
+                        return;
+                    }
+
+                    const transfer = new DataTransfer();
+                    transfer.items.add(file);
+                    trailerInput.files = transfer.files;
+                    renderTrailer(file);
+                });
+            }
+        })();
+    </script>
+}

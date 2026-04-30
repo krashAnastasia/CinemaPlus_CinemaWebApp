@@ -1,0 +1,142 @@
+@using System.Security.Claims
+@using CinemaPlus.CinemaWebApp.Services
+@inject IBonusService BonusService
+@{
+    var title = ViewData["Title"] as string ?? "Головна";
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var isAdmin = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value == "Admin";
+    var currentUserId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedUserId)
+        ? parsedUserId
+        : (int?)null;
+    var showBonus = isAuthenticated && !isAdmin && currentUserId.HasValue;
+    var bonusLabel = string.Empty;
+
+    if (showBonus)
+    {
+        bonusLabel = BonusService.FormatBonusLabel(await BonusService.CalculateBonusAsync(currentUserId!.Value));
+    }
+}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="~/source/logo-blue-dark-fav.png" />
+    <title>CINEMA+ | @title</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GzZg2j8bG6D0bABMZOcbao6cQr+HR/0fJsc6HUO4A5OWLxN8A7UxCmgQUWv4mmKF" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="site-header">
+        <nav class="navbar-custom">
+            <a asp-controller="Home" asp-action="Index" class="navbar-brand">
+                <img src="~/source/logo-nav.png" alt="CINEMA+ logo" class="navbar-logo" />
+            </a>
+
+            <div class="navbar-center">
+                <a asp-controller="Home" asp-action="Index">У КІНО</a>
+                <a asp-controller="Sessions" asp-action="Index">СЕАНСИ</a>
+                <a asp-controller="Home" asp-action="ComingSoon">СКОРО</a>
+            </div>
+
+            <div class="navbar-right desktop-nav">
+                @if (isAuthenticated)
+                {
+                    @if (isAdmin)
+                    {
+                        <a asp-controller="Admin" asp-action="Films">АДМІН-ПАНЕЛЬ</a>
+                    }
+                    @if (showBonus)
+                    {
+                        <a asp-controller="Profile" asp-action="Index">@bonusLabel</a>
+                    }
+                    <a asp-controller="Profile" asp-action="Index">КАБІНЕТ</a>
+                    <a asp-controller="Account" asp-action="Logout" class="logout-link">ВИЙТИ</a>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="logout-link">ВХІД</a>
+                }
+            </div>
+
+            <button class="navbar-burger" id="navbarBurger" aria-label="Відкрити меню" aria-expanded="false" aria-controls="mobileMenu" type="button">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </nav>
+
+        <div id="mobileMenu" class="mobile-menu">
+            <a asp-controller="Home" asp-action="Index">У КІНО</a>
+            <a asp-controller="Sessions" asp-action="Index">СЕАНСИ</a>
+            <a asp-controller="Home" asp-action="ComingSoon">СКОРО</a>
+            @if (isAuthenticated)
+            {
+                @if (isAdmin)
+                {
+                    <a asp-controller="Admin" asp-action="Films">АДМІН-ПАНЕЛЬ</a>
+                }
+                @if (showBonus)
+                {
+                    <a asp-controller="Profile" asp-action="Index">@bonusLabel</a>
+                }
+                <a asp-controller="Profile" asp-action="Index">КАБІНЕТ</a>
+                <a asp-controller="Account" asp-action="Logout" class="logout-link">ВИЙТИ</a>
+            }
+            else
+            {
+                <a asp-controller="Account" asp-action="Login" class="logout-link">ВХІД</a>
+            }
+        </div>
+    </header>
+
+    <main class="site-main">
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-social">
+                <a href="#" class="social-circle" aria-label="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+
+                <a href="#" class="social-circle" aria-label="Facebook">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+
+                <a href="#" class="social-circle" aria-label="WhatsApp">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+
+                <a href="#" class="social-circle" aria-label="YouTube">
+                    <i class="fab fa-youtube"></i>
+                </a>
+            </div>
+
+            <div class="footer-links footer-links-top" aria-label="Основна навігація футера">
+                <a asp-controller="Home" asp-action="Index">У КІНО</a>
+                <a asp-controller="Sessions" asp-action="Index">СЕАНСИ</a>
+                <a asp-controller="Home" asp-action="ComingSoon">СКОРО</a>
+            </div>
+
+            <div class="footer-links footer-links-bottom" aria-label="Додаткова навігація футера">
+                <a asp-controller="Home" asp-action="Faq">FAQ</a>
+                <a asp-controller="Home" asp-action="Return">ПОВЕРНЕННЯ</a>
+                <a asp-controller="Home" asp-action="Rules">ПРАВИЛА</a>
+                <a asp-controller="Home" asp-action="Policy">ПОЛІТИКА</a>
+                <a asp-controller="Home" asp-action="Contacts">КОНТАКТИ</a>
+            </div>
+
+            <div class="footer-copy">
+                <p>ПЗПІпз-24-1 Крашеніннікова Анастасія</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-8TSWiREU2Cq6g47LjJZCv4M+uXvyUM9H1kCuc+xDaLbJFcq75megpYs93FjkqbDU" crossorigin="anonymous"></script>
+    <script src="~/script.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

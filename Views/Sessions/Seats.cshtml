@@ -1,0 +1,147 @@
+@model SeatSelectionViewModel
+@{
+    ViewData["Title"] = $"{Model.MovieTitle} | Місця";
+}
+
+<section class="film-seating-page">
+    <div class="film-seating-page__container">
+        <div class="film-seating-page__layout">
+            <aside class="film-seating-page__sidebar">
+                <div class="film-seating-page__poster">
+                    <img src="@Model.PosterPath" alt="@Model.MovieTitle poster">
+                </div>
+            </aside>
+
+            <div class="film-seating-page__content" data-seat-selection-root data-seat-price="@Model.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                <h1 class="film-seating-page__title">@Model.MovieTitle</h1>
+
+                <div class="film-seating-page__meta">
+                    <p>Жанр: @Model.Genre</p>
+                    <p>Тривалість: @Model.DurationMinutes хв</p>
+                    <p>Вікове обмеження: @Model.AgeRestriction</p>
+                    <p>Мова: укр. дубляж</p>
+                    <p>Сеанси: @Model.SessionSummaryText</p>
+                </div>
+
+                <div class="film-seating-page__section">
+                    <h2 class="film-seating-page__section-title">ДАТА</h2>
+                    <div class="film-seating-page__chips film-seating-page__chips--dates" data-group="dates">
+                        @foreach (var chip in Model.DateChips)
+                        {
+                            var chipClass = chip.IsActive ? "chip chip--active" : "chip";
+                            <a asp-controller="Sessions" asp-action="Seats" asp-route-sessionId="@chip.SessionId" class="@chipClass">@chip.Label</a>
+                        }
+                    </div>
+                </div>
+
+                <div class="film-seating-page__section">
+                    <h2 class="film-seating-page__section-title">СЕАНС</h2>
+                    <div class="film-seating-page__chips film-seating-page__chips--sessions" data-group="sessions">
+                        @foreach (var chip in Model.SessionChips)
+                        {
+                            var chipClass = chip.IsActive ? "chip chip--active" : "chip";
+                            <a asp-controller="Sessions" asp-action="Seats" asp-route-sessionId="@chip.SessionId" class="@chipClass">@chip.Label</a>
+                        }
+                    </div>
+                </div>
+
+                <div class="film-seating-page__section">
+                    <h2 class="film-seating-page__section-title">ОБРАТИ МІСЦЯ</h2>
+                </div>
+
+                <form asp-controller="Sessions" asp-action="Seats" asp-route-sessionId="@Model.SessionId" method="post">
+                    <div asp-validation-summary="ModelOnly" class="form-validation-summary"></div>
+
+                    <div class="film-seating-page__bottom">
+                        <div class="film-seating-page__summary">
+                            <h3 class="film-seating-page__summary-title">ОБРАНО:</h3>
+                            <p data-selected-seats class="film-seating-page__selected-line">
+                                @(Model.SelectedSeatLabels.Count > 0
+                                    ? string.Join(" • ", Model.SelectedSeatLabels)
+                                    : "МІСЦЯ ЩЕ НЕ ОБРАНІ")
+                            </p>
+                            <p data-selected-total>ДО СПЛАТИ: @Model.SelectedTotalPrice.ToString("0.00") грн</p>
+                            <div data-selected-seat-inputs>
+                                @foreach (var seatId in Model.SelectedSeatIds)
+                                {
+                                    <input type="hidden" name="SelectedSeatIds" value="@seatId">
+                                }
+                            </div>
+                            @if (Model.CanProceed)
+                            {
+                                <button type="submit" class="btn-primary film-seating-page__order-button" data-order-button>ОФОРМИТИ ЗАМОВЛЕННЯ</button>
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn-primary film-seating-page__order-button" data-order-button disabled>ОФОРМИТИ ЗАМОВЛЕННЯ</button>
+                            }
+                        </div>
+
+                        <div class="film-seating-page__hall">
+                            <div class="hall-card" style="--hall-rows: @Model.Rows.Count; --hall-seats-per-row: @Model.SeatsPerRow;">
+                                <div class="hall-card__screen-wrap">
+                                    <div class="hall-card__screen"></div>
+                                    <div class="hall-card__screen-label">ЕКРАН</div>
+                                </div>
+
+                                <div class="hall-card__grid-wrap">
+                                    <div class="hall-card__row-labels">
+                                        @foreach (var row in Model.Rows)
+                                        {
+                                            <span>@row.Label</span>
+                                        }
+                                    </div>
+
+                                    <div class="hall-card__seats">
+                                        @foreach (var row in Model.Rows)
+                                        {
+                                            @foreach (var seat in row.Seats)
+                                            {
+                                                if (seat.IsBooked)
+                                                {
+                                                    <button class="@seat.CssClass" id="seat-@seat.RowLabel-@seat.SeatNumber" type="button" aria-label="@seat.AriaLabel" disabled></button>
+                                                }
+                                                else
+                                                {
+                                                    <button
+                                                        class="@seat.CssClass"
+                                                        id="seat-@seat.RowLabel-@seat.SeatNumber"
+                                                        type="button"
+                                                        data-seat-id="@seat.Id"
+                                                        data-seat-label="@seat.AriaLabel"
+                                                        aria-label="@seat.AriaLabel"></button>
+                                                }
+                                            }
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="hall-card__numbers">
+                                    @for (var seatNumber = 1; seatNumber <= Model.SeatsPerRow; seatNumber++)
+                                    {
+                                        <span>@seatNumber</span>
+                                    }
+                                </div>
+
+                                <div class="hall-card__legend">
+                                    <div class="legend-item">
+                                        <span class="legend-dot legend-dot--available"></span>
+                                        <span>ВІЛЬНІ</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-dot legend-dot--unavailable"></span>
+                                        <span>НЕ ДОСТУПНІ</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-dot legend-dot--selected"></span>
+                                        <span>ОБРАНІ</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

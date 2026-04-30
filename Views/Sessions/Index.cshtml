@@ -1,0 +1,109 @@
+@model SessionScheduleViewModel
+@{
+    ViewData["Title"] = "Сеанси";
+}
+
+<section class="movies-section sessions-page">
+    <div class="movies-container">
+        <h2 class="section-title">СЕАНСИ</h2>
+
+        <form asp-controller="Sessions" asp-action="Index" method="get" class="sessions-filters">
+            <div class="sessions-filters__field">
+                <label for="schedule-date">Дата</label>
+                <input id="schedule-date" type="date" name="date" value="@Model.SelectedDateValue" aria-describedby="schedule-date-hint">
+                <span id="schedule-date-hint" class="sessions-filters__hint">Формат: dd.mm.yyyy</span>
+            </div>
+
+            <div class="sessions-filters__field">
+                <label for="schedule-movie">Фільм</label>
+                <select id="schedule-movie" name="movieId">
+                    <option value="">Усі фільми</option>
+                    @foreach (var movie in Model.MovieOptions)
+                    {
+                        if (Model.SelectedMovieId == movie.Id)
+                        {
+                            <option value="@movie.Id" selected>@movie.Label</option>
+                        }
+                        else
+                        {
+                            <option value="@movie.Id">@movie.Label</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="sessions-filters__field">
+                <label for="schedule-hall">Зал</label>
+                <select id="schedule-hall" name="hallId">
+                    <option value="">Усі зали</option>
+                    @foreach (var hall in Model.HallOptions)
+                    {
+                        if (Model.SelectedHallId == hall.Id)
+                        {
+                            <option value="@hall.Id" selected>@hall.Label</option>
+                        }
+                        else
+                        {
+                            <option value="@hall.Id">@hall.Label</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="sessions-filters__actions">
+                <button type="submit" class="btn-primary sessions-filters__submit">ЗАСТОСУВАТИ</button>
+                <a asp-controller="Sessions" asp-action="Index" class="sessions-filters__reset">СКИНУТИ</a>
+            </div>
+        </form>
+
+        <div class="sessions-table-card">
+            <div class="sessions-table-wrap">
+                <table class="sessions-table">
+                    <thead>
+                        <tr>
+                            <th>ФІЛЬМ</th>
+                            <th>ДАТА</th>
+                            <th>ЧАС</th>
+                            <th>ЗАЛ</th>
+                            <th>ТЕХНОЛОГІЯ</th>
+                            <th>ЦІНА</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Sessions.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="7" class="sessions-table__empty">@Model.EmptyMessage</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var session in Model.Sessions)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="sessions-table__movie">
+                                            <img src="@session.PosterPath" alt="@session.MovieTitle poster" class="sessions-table__poster">
+                                            <div>
+                                                <a asp-controller="Movies" asp-action="Details" asp-route-id="@session.MovieId" class="sessions-table__movie-link">@session.MovieTitle</a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@session.DateText</td>
+                                    <td>@session.TimeText</td>
+                                    <td>@session.HallName</td>
+                                    <td>@session.Technology</td>
+                                    <td>@session.Price.ToString("0.00") грн</td>
+                                    <td class="sessions-table__action-cell">
+                                        <a asp-controller="Sessions" asp-action="Seats" asp-route-sessionId="@session.SessionId" class="btn-primary sessions-table__action">ОБРАТИ<br>МІСЦЯ</a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

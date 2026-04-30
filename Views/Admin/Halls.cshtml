@@ -1,0 +1,71 @@
+@model AdminHallListViewModel
+@{
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <h1 class="mb-0">Зали</h1>
+        <a asp-controller="Admin" asp-action="AddHall" class="btn btn-dark">Додати зал</a>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="alert alert-success" role="status">@Model.StatusMessage</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Назва</th>
+                    <th>Технологія</th>
+                    <th>Ряди</th>
+                    <th>Місць у ряду</th>
+                    <th>Усього місць</th>
+                    <th>Сеанси</th>
+                    <th>Статус схеми</th>
+                    <th>Дії</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var hall in Model.Halls)
+                {
+                    <tr>
+                        <td>@hall.Name</td>
+                        <td>@hall.Technology</td>
+                        <td>@hall.RowsCount</td>
+                        <td>@hall.SeatsPerRow</td>
+                        <td>@hall.TotalSeats</td>
+                        <td>@hall.SessionsCount</td>
+                        <td>
+                            @if (hall.LayoutLocked)
+                            {
+                                <span class="badge text-bg-warning">Схему заблоковано бронюваннями</span>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-success">Можна змінювати</span>
+                            }
+                        </td>
+                        <td class="text-nowrap">
+                            <a asp-controller="Admin" asp-action="EditHall" asp-route-id="@hall.Id" class="btn btn-sm btn-outline-primary me-1" title="Редагувати">
+                                <i class="fa-solid fa-pencil"></i>
+                            </a>
+                            <form asp-controller="Admin" asp-action="DeleteHall" asp-route-id="@hall.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Видалити" onclick="return confirm('Ви впевнені, що хочете видалити цей зал?');">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

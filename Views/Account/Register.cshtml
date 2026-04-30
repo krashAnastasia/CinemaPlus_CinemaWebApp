@@ -1,0 +1,56 @@
+@model RegisterViewModel
+
+@{
+    ViewData["Title"] = "Реєстрація";
+}
+
+<section class="register-page">
+    <div class="register-hero">
+        <div class="register-hero__overlay">
+            <div class="register-card">
+                <h1 class="register-card__title">РЕЄСТРАЦІЯ</h1>
+
+                <form asp-controller="Account" asp-action="Register" method="post" class="register-form" novalidate>
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="auth-validation"></div>
+
+                    <div class="register-form__field">
+                        <input asp-for="FirstName" type="text" placeholder="Ім'я" autocomplete="given-name" />
+                        <span asp-validation-for="FirstName" class="auth-validation"></span>
+                    </div>
+
+                    <div class="register-form__field">
+                        <input asp-for="LastName" type="text" placeholder="Прізвище" autocomplete="family-name" />
+                        <span asp-validation-for="LastName" class="auth-validation"></span>
+                    </div>
+
+                    <div class="register-form__field">
+                        <input asp-for="Email" type="email" placeholder="електронна пошта" autocomplete="email" />
+                        <span asp-validation-for="Email" class="auth-validation"></span>
+                    </div>
+
+                    <div class="register-form__field">
+                        <input asp-for="Phone" type="tel" placeholder="номер телефону" autocomplete="tel" />
+                        <span asp-validation-for="Phone" class="auth-validation"></span>
+                    </div>
+
+                    <div class="register-form__field">
+                        <input asp-for="Password" type="password" placeholder="пароль" autocomplete="new-password" />
+                        <span asp-validation-for="Password" class="auth-validation"></span>
+                    </div>
+
+                    <div class="register-form__field">
+                        <input asp-for="ConfirmPassword" type="password" placeholder="підтвердити пароль" autocomplete="new-password" />
+                        <span asp-validation-for="ConfirmPassword" class="auth-validation"></span>
+                    </div>
+
+                    <div class="register-form__actions">
+                        <a asp-controller="Home" asp-action="Index" class="button-dark">НА ГОЛОВНУ</a>
+                        <button type="submit" class="button-primary">РЕЄСТРАЦІЯ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,132 @@
+@model AdminFilmListViewModel
+@{
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <h1 class="mb-0">Фільми у прокаті</h1>
+        <a asp-controller="Admin" asp-action="AddFilm" class="btn btn-dark">Додати фільм</a>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="alert alert-success" role="status">@Model.StatusMessage</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+    }
+
+    <form asp-controller="Admin" asp-action="Films" method="get" class="row g-2 align-items-end mb-3">
+        <div class="col-12 col-sm-6 col-md-3 col-lg-2">
+            <label for="search" class="form-label">Пошук (назва)</label>
+            <input id="search" name="q" class="form-control" value="@Model.SearchQuery" placeholder="Напр. Dune" />
+        </div>
+
+        <div class="col-12 col-sm-6 col-md-3 col-lg-2">
+            <label for="genreSelect" class="form-label">Жанр</label>
+            <select id="genreSelect" name="genre" class="form-select">
+                <option value="">Усі</option>
+                @foreach (var genre in Model.Genres)
+                {
+                    if (Model.Genre == genre)
+                    {
+                        <option value="@genre" selected>@genre</option>
+                    }
+                    else
+                    {
+                        <option value="@genre">@genre</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="col-12 col-sm-6 col-md-2 col-lg-1">
+            <label for="yearMin" class="form-label">Рік від</label>
+            <input id="yearMin" name="yearMin" type="number" class="form-control" value="@Model.YearMin" />
+        </div>
+
+        <div class="col-12 col-sm-6 col-md-2 col-lg-1">
+            <label for="yearMax" class="form-label">Рік до</label>
+            <input id="yearMax" name="yearMax" type="number" class="form-control" value="@Model.YearMax" />
+        </div>
+
+        <div class="col-12 col-sm-6 col-md-3 col-lg-2">
+            <label for="sortBy" class="form-label">Сортувати</label>
+            <select id="sortBy" name="sortBy" class="form-select">
+                <option value="film_title" selected="@(Model.SortBy == "film_title")">Назва</option>
+                <option value="genre" selected="@(Model.SortBy == "genre")">Жанр</option>
+                <option value="duration" selected="@(Model.SortBy == "duration")">Тривалість</option>
+                <option value="release_year" selected="@(Model.SortBy == "release_year")">Рік</option>
+                <option value="age_restriction" selected="@(Model.SortBy == "age_restriction")">Вікове обмеження</option>
+            </select>
+        </div>
+
+        <div class="col-12 col-sm-6 col-md-2 col-lg-2">
+            <label for="sortDir" class="form-label">Напрям</label>
+            <select id="sortDir" name="sortDir" class="form-select">
+                <option value="asc" selected="@(Model.SortDir == "asc")">За зростанням</option>
+                <option value="desc" selected="@(Model.SortDir == "desc")">За спаданням</option>
+            </select>
+        </div>
+
+        <div class="col-12 col-lg-2 d-flex gap-2">
+            <button type="submit" class="btn btn-dark w-100">ЗАСТОСУВАТИ</button>
+            <a asp-controller="Admin" asp-action="Films" class="btn btn-outline-secondary w-100">СКИНУТИ</a>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Постер</th>
+                    <th>Назва</th>
+                    <th>Жанр</th>
+                    <th>Тривалість</th>
+                    <th style="min-width: 280px;">Опис</th>
+                    <th>Рік</th>
+                    <th>Вік</th>
+                    <th>Дії</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Films.Count == 0)
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">За поточними фільтрами фільмів не знайдено.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var film in Model.Films)
+                    {
+                        <tr>
+                            <td>
+                                <img src="@film.PosterPath" alt="@film.Title" class="rounded" style="width:72px;height:96px;object-fit:cover;" />
+                            </td>
+                            <td>@film.Title</td>
+                            <td>@film.Genre</td>
+                            <td>@film.DurationMinutes хв</td>
+                            <td>@film.Description</td>
+                            <td>@film.ReleaseYear</td>
+                            <td>@film.AgeRestriction</td>
+                            <td class="text-nowrap">
+                                <a asp-controller="Admin" asp-action="EditFilm" asp-route-id="@film.Id" class="btn btn-sm btn-outline-primary me-1" title="Редагувати">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </a>
+                                <form asp-controller="Admin" asp-action="DeleteFilm" asp-route-id="@film.Id" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Видалити" onclick="return confirm('Ви впевнені, що хочете видалити цей фільм?');">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

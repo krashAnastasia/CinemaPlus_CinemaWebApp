@@ -1,0 +1,44 @@
+@model LoginViewModel
+
+@{
+    ViewData["Title"] = "Вхід";
+}
+
+<section class="signin-page">
+    <div class="signin-hero">
+        <div class="signin-hero__overlay">
+            <div class="signin-card">
+                <h1 class="signin-card__title">ВХІД ДО ОСОБИСТОГО КАБІНЕТУ</h1>
+
+                @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+                {
+                    <div class="auth-status-message" role="status">@Model.StatusMessage</div>
+                }
+
+                <form asp-controller="Account" asp-action="Login" method="post" class="signin-form" novalidate>
+                    @Html.AntiForgeryToken()
+                    <input asp-for="ReturnUrl" type="hidden" />
+
+                    <div asp-validation-summary="ModelOnly" class="auth-validation"></div>
+
+                    <div class="signin-form__field">
+                        <input asp-for="Email" type="email" placeholder="електронна пошта" autocomplete="email" />
+                        <span asp-validation-for="Email" class="auth-validation"></span>
+                    </div>
+
+                    <div class="signin-form__field">
+                        <input asp-for="Password" type="password" placeholder="пароль" autocomplete="current-password" />
+                        <span asp-validation-for="Password" class="auth-validation"></span>
+                    </div>
+
+                    <div class="signin-form__actions">
+                        <a asp-controller="Account" asp-action="Register" class="button-dark">РЕЄСТРАЦІЯ</a>
+                        <button type="submit" class="button-primary">УВІЙТИ</button>
+                    </div>
+
+                    <a asp-controller="Account" asp-action="ForgotPassword" class="signin-form__forgot">ЗАБУЛИ ПАРОЛЬ</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

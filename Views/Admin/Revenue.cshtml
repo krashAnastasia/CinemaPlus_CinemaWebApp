@@ -1,0 +1,98 @@
+@model AdminRevenueViewModel
+@{
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4">Доходи за період</h1>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+    }
+
+    <form method="get" asp-controller="Admin" asp-action="Revenue" class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="startDate" class="form-label">Дата початку</label>
+                    <input id="startDate" name="startDate" type="date" value="@Model.StartDate?.ToString("yyyy-MM-dd")" class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <label for="endDate" class="form-label">Дата завершення</label>
+                    <input id="endDate" name="endDate" type="date" value="@Model.EndDate?.ToString("yyyy-MM-dd")" class="form-control" />
+                </div>
+
+                <div class="col-md-auto d-flex gap-2">
+                    <button type="submit" class="btn btn-dark">Показати статистику</button>
+                    <a asp-controller="Admin" asp-action="Revenue" class="btn btn-outline-secondary">Очистити</a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Оплачених бронювань</p>
+                    <p class="display-6 mb-0">@Model.TotalPaidBookings</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Продано місць</p>
+                    <p class="display-6 mb-0">@Model.TotalSoldSeats</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Загальний дохід</p>
+                    <p class="display-6 mb-0">@Model.TotalRevenue.ToString("0.00", CinemaPresentationHelper.UkrainianCulture) грн</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Дата і час сеансу</th>
+                    <th>Фільм</th>
+                    <th>Зал</th>
+                    <th>Ціна квитка</th>
+                    <th>Продано місць</th>
+                    <th>Виручка</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Sessions.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">За вибраний період продажів не знайдено.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var session in Model.Sessions)
+                    {
+                        <tr>
+                            <td>@session.SessionTime.ToString("dd.MM.yyyy HH:mm", CinemaPresentationHelper.UkrainianCulture)</td>
+                            <td>@session.FilmTitle</td>
+                            <td>@session.HallName (@session.Technology)</td>
+                            <td>@session.TicketPrice.ToString("0.00", CinemaPresentationHelper.UkrainianCulture) грн</td>
+                            <td>@session.SoldSeatsCount</td>
+                            <td>@session.Revenue.ToString("0.00", CinemaPresentationHelper.UkrainianCulture) грн</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

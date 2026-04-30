@@ -1,0 +1,41 @@
+@model MovieCatalogueViewModel
+@{
+    ViewData["Title"] = "Головна";
+}
+
+@if (Model.ShowHero)
+{
+    <section class="hero-section">
+        <img src="~/source/hero-img.jpg" alt="CINEMA+ Hero" class="hero-image" />
+    </section>
+}
+
+<section class="movies-section">
+    <div class="movies-container">
+        <h2 class="section-title">@Model.Title</h2>
+        @if (Model.Films.Count == 0)
+        {
+            <p class="shell-placeholder">@Model.EmptyMessage</p>
+        }
+        else
+        {
+            <div class="movies-grid">
+                @foreach (var film in Model.Films)
+                {
+                    <a asp-controller="Movies" asp-action="Details" asp-route-id="@film.Id" class="film-card-link">
+                        <article class="movie-card">
+                            <div class="movie-poster">
+                                <img src="@film.PosterPath" alt="@film.Title poster">
+                            </div>
+                            <div class="movie-meta">
+                                <h3>@film.Title</h3>
+                                <div class="session-times">@film.SessionSummary</div>
+                            </div>
+                            <button class="btn btn-primary w-100" type="button">КУПИТИ КВИТОК</button>
+                        </article>
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</section>

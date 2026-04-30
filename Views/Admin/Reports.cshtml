@@ -1,0 +1,88 @@
+@model AdminReportsViewModel
+@{
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4">Звіти</h1>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="alert alert-success" role="status">@Model.StatusMessage</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+    }
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="mb-3">Сформувати звіт Excel</h5>
+
+            <form method="get" asp-controller="Admin" asp-action="ExportStatsExcel" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="startDate" class="form-label">Дата початку</label>
+                    <input id="startDate" name="startDate" type="date" value="@Model.StartDate?.ToString("yyyy-MM-dd")" class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <label for="endDate" class="form-label">Дата завершення</label>
+                    <input id="endDate" name="endDate" type="date" value="@Model.EndDate?.ToString("yyyy-MM-dd")" class="form-control" />
+                </div>
+
+                <div class="col-md-auto d-flex gap-2">
+                    <button type="submit" class="btn btn-dark">Сформувати Excel</button>
+                    <a asp-controller="Admin" asp-action="Reports" class="btn btn-outline-secondary">Очистити</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Сеансів у звіті</p>
+                    <p class="display-6 mb-0">@Model.TotalSessions</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Оплачених бронювань</p>
+                    <p class="display-6 mb-0">@Model.TotalPaidBookings</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Продано місць</p>
+                    <p class="display-6 mb-0">@Model.TotalSoldSeats</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Загальний дохід</p>
+                    <p class="display-6 mb-0">@Model.TotalRevenue.ToString("0.00", CinemaPresentationHelper.UkrainianCulture) грн</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="mb-3">Файл міститиме такі аркуші</h5>
+            <ul class="mb-0">
+                <li><strong>Огляд доходів</strong> - зведення по сеансах, бронюваннях, місцях і доходу.</li>
+                <li><strong>Огляд бронювань</strong> - підсумки за статусами бронювань.</li>
+                <li><strong>Популярність фільмів</strong> - фільми, жанри, кількість сеансів, бронювань і проданих місць.</li>
+                <li><strong>Сеанси за залами</strong> - статистика по залах і технологіях.</li>
+            </ul>
+        </div>
+    </div>
+</div>

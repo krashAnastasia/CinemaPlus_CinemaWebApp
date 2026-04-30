@@ -1,0 +1,125 @@
+@model MovieDetailsViewModel
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<main class="film-page">
+    <section class="film-page__container">
+        <div class="film-page__layout">
+            <aside class="film-page__sidebar">
+                <div class="film-page__poster">
+                    <img src="@Model.PosterPath" alt="@Model.Title poster">
+                </div>
+                @if (Model.HasAvailableSessions)
+                {
+                    var buySessionId = Model.SelectedSessionId ?? Model.PrimarySessionId;
+                    <a
+                        asp-controller="Sessions"
+                        asp-action="MovieSessions"
+                        asp-route-movieId="@Model.Id"
+                        asp-route-sessionId="@buySessionId"
+                        class="btn-primary film-page__buy-button">КУПИТИ КВИТОК</a>
+                }
+                else
+                {
+                    <span class="btn-primary film-page__buy-button film-page__buy-button--disabled">СКОРО У ПРОКАТІ</span>
+                }
+            </aside>
+
+            <div class="film-page__content">
+                <h1 class="film-page__title">@Model.Title</h1>
+
+                <div class="film-page__meta">
+                    <p>Жанр: @Model.Genre</p>
+                    <p>Тривалість: @Model.DurationMinutes хв</p>
+                    <p>Рік випуску: @Model.ReleaseYear</p>
+                    <p>Вікове обмеження: @Model.AgeRestriction</p>
+                    <p>Мова: укр. дубляж</p>
+                    <p>Статус: @Model.AvailabilityText</p>
+                    <p>Сеанси: @Model.SessionSummary</p>
+                </div>
+
+                @if (Model.HasAvailableSessions)
+                {
+                    <div class="film-page__session-picker">
+                        <div class="film-page__session-section">
+                            <h2 class="film-page__section-title">ДАТА</h2>
+                            <div class="film-page__chips">
+                                @foreach (var chip in Model.DateChips)
+                                {
+                                    var chipClass = chip.IsActive ? "chip chip--active" : "chip";
+                                    <a asp-controller="Movies" asp-action="Details" asp-route-id="@Model.Id" asp-route-sessionId="@chip.SessionId" class="@chipClass">@chip.Label</a>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="film-page__session-section">
+                            <h2 class="film-page__section-title">СЕАНС</h2>
+                            <div class="film-page__chips">
+                                @foreach (var chip in Model.SessionChips)
+                                {
+                                    var chipClass = chip.IsActive ? "chip chip--active" : "chip";
+                                    <a
+                                        asp-controller="Sessions"
+                                        asp-action="MovieSessions"
+                                        asp-route-movieId="@Model.Id"
+                                        asp-route-sessionId="@chip.SessionId"
+                                        class="@chipClass">@chip.Label</a>
+                                }
+                            </div>
+                        </div>
+
+                        @if (Model.SelectedSessionId.HasValue)
+                        {
+                            <div class="film-page__selected-session">
+                                <p>@Model.SelectedSessionDateLabel</p>
+                                <p>@Model.SelectedSessionHallLabel</p>
+                                <p>@Model.SelectedSessionPriceLabel</p>
+                            </div>
+                        }
+                        else if (Model.HasAvailableSessions)
+                        {
+                            <div class="film-page__selected-session">
+                                <p>Оберіть зручний час або скористайтеся кнопкою «КУПИТИ КВИТОК», щоб відкрити схему залу.</p>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <div class="film-page__description">
+                    <h2>Опис</h2>
+                    <p>@Model.Description</p>
+                </div>
+
+                <div class="film-page__trailer-block">
+                    <h2 class="film-page__trailer-title">ДИВИТИСЯ ТРЕЙЛЕР</h2>
+                    <div class="film-page__trailer-preview">
+                        @if (Model.HasTrailer)
+                        {
+                            <video
+                                class="film-page__trailer-video"
+                                poster="@Model.PosterPath"
+                                preload="metadata"
+                                playsinline
+                                data-trailer-video>
+                                <source src="@Model.TrailerPath" />
+                            </video>
+                            <div class="film-page__trailer-overlay" data-trailer-overlay></div>
+                            <button class="film-page__play-button" aria-label="Увімкнути трейлер" type="button" data-trailer-play>
+                                <i class="fa-solid fa-play"></i>
+                            </button>
+                        }
+                        else
+                        {
+                            <img src="~/source/hero-img.jpg" alt="@Model.Title trailer preview">
+                            <div class="film-page__trailer-overlay"></div>
+                            <div class="film-page__trailer-placeholder">
+                                <span>Трейлер буде додано незабаром</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
