@@ -45,6 +45,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(user => user.FullName).HasMaxLength(150).IsRequired();
             entity.Property(user => user.Email).HasMaxLength(180).IsRequired();
             entity.Property(user => user.Phone).HasMaxLength(30);
+            entity.Property(user => user.ProfilePhotoPath).HasMaxLength(300);
             entity.Property(user => user.PasswordHash).HasMaxLength(255).IsRequired();
             entity.Property(user => user.Role).HasMaxLength(30).IsRequired();
             entity.Property(user => user.CreatedAt).IsRequired();

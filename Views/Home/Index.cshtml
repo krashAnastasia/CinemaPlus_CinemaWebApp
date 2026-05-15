@@ -5,8 +5,32 @@
 
 @if (Model.ShowHero)
 {
-    <section class="hero-section">
-        <img src="~/source/hero-img.jpg" alt="CINEMA+ Hero" class="hero-image" />
+    <section class="hero-section" aria-label="Головний банер">
+        <div class="hero-slider" data-hero-slider data-hero-interval="3000">
+            <div class="hero-slider__slides" aria-live="polite">
+                <figure class="hero-slide" data-hero-slide>
+                    <img src="~/source/hero-img.jpg" alt="Головний банер CinemaPlus" class="hero-image" />
+                </figure>
+                <figure class="hero-slide" data-hero-slide>
+                    <img src="~/source/twilight-hero.webp" alt="Банер фільму Сутінки" class="hero-image" />
+                </figure>
+                <figure class="hero-slide" data-hero-slide>
+                    <img src="~/source/Avengers_Endgame_hero.webp" alt="Банер фільму Avengers Endgame" class="hero-image" />
+                </figure>
+                <figure class="hero-slide" data-hero-slide>
+                    <img src="~/source/avatar_hero.webp" alt="Банер фільму Avatar" class="hero-image" />
+                </figure>
+            </div>
+
+            <div class="hero-slider__overlay"></div>
+
+            <div class="hero-slider__indicators" aria-label="Навігація банера">
+                <button type="button" class="hero-slider__dot" data-hero-dot aria-label="Слайд 1" aria-current="false"></button>
+                <button type="button" class="hero-slider__dot" data-hero-dot aria-label="Слайд 2" aria-current="false"></button>
+                <button type="button" class="hero-slider__dot" data-hero-dot aria-label="Слайд 3" aria-current="false"></button>
+                <button type="button" class="hero-slider__dot" data-hero-dot aria-label="Слайд 4" aria-current="false"></button>
+            </div>
+        </div>
     </section>
 }
 

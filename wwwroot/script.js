@@ -1,4 +1,133 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const heroSlider = document.querySelector('[data-hero-slider]');
+
+  if (heroSlider) {
+    const slides = Array.from(heroSlider.querySelectorAll('[data-hero-slide]'));
+    const dots = Array.from(heroSlider.querySelectorAll('[data-hero-dot]'));
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const interval = Number(heroSlider.getAttribute('data-hero-interval') || '5000');
+    const initialIndex = Math.max(0, slides.findIndex((slide) => slide.classList.contains('is-active')));
+    let activeIndex = initialIndex === -1 ? 0 : initialIndex;
+    let timerId = null;
+
+    const renderSlide = (index, enableExit = true) => {
+      slides.forEach((slide, slideIndex) => {
+        const isActive = slideIndex === index;
+        const wasActive = slideIndex === activeIndex;
+
+        slide.classList.toggle('is-active', isActive);
+        slide.classList.toggle('is-exiting', enableExit && wasActive && !isActive);
+      });
+
+      dots.forEach((dot, dotIndex) => {
+        const isActive = dotIndex === index;
+        dot.classList.toggle('is-active', isActive);
+        dot.setAttribute('aria-current', isActive ? 'true' : 'false');
+      });
+
+      activeIndex = index;
+    };
+
+    const advanceSlide = () => {
+      if (slides.length < 2) {
+        return;
+      }
+
+      const nextIndex = (activeIndex + 1) % slides.length;
+      renderSlide(nextIndex);
+    };
+
+    const stopAutoPlay = () => {
+      if (timerId !== null) {
+        window.clearInterval(timerId);
+        timerId = null;
+      }
+    };
+
+    const startAutoPlay = () => {
+      if (reduceMotion || slides.length < 2 || timerId !== null) {
+        return;
+      }
+
+      timerId = window.setInterval(advanceSlide, interval);
+    };
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        renderSlide(index);
+        stopAutoPlay();
+        startAutoPlay();
+      });
+    });
+
+    heroSlider.addEventListener('mouseenter', stopAutoPlay);
+    heroSlider.addEventListener('mouseleave', startAutoPlay);
+    heroSlider.addEventListener('focusin', stopAutoPlay);
+    heroSlider.addEventListener('focusout', () => {
+      if (!heroSlider.contains(document.activeElement)) {
+        startAutoPlay();
+      }
+    });
+
+    slides.forEach((slide) => {
+      slide.classList.remove('is-active', 'is-exiting');
+    });
+
+    dots.forEach((dot) => {
+      dot.classList.remove('is-active');
+      dot.setAttribute('aria-current', 'false');
+    });
+
+    if (reduceMotion) {
+      renderSlide(activeIndex, false);
+      startAutoPlay();
+    } else {
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          renderSlide(activeIndex, false);
+          startAutoPlay();
+        });
+      });
+    }
+  }
+
+  const profileRoot = document.querySelector('[data-profile-root]');
+
+  if (profileRoot) {
+    const displayCard = profileRoot.querySelector('[data-profile-display]');
+    const editForm = profileRoot.querySelector('[data-profile-form]');
+    const openButtons = profileRoot.querySelectorAll('[data-profile-edit-open]');
+    const cancelButton = profileRoot.querySelector('[data-profile-edit-cancel]');
+    const photoForm = profileRoot.querySelector('[data-profile-photo-form]');
+    const photoInput = profileRoot.querySelector('[data-profile-photo-input]');
+
+    const setProfileEditMode = (isEditing) => {
+      displayCard?.classList.toggle('is-hidden', isEditing);
+      editForm?.classList.toggle('is-visible', isEditing);
+
+      if (isEditing) {
+        const firstInput = editForm?.querySelector('input');
+        firstInput?.focus();
+      }
+    };
+
+    openButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        setProfileEditMode(true);
+      });
+    });
+
+    cancelButton?.addEventListener('click', () => {
+      setProfileEditMode(false);
+    });
+
+    photoInput?.addEventListener('change', () => {
+      if (photoInput.files && photoInput.files.length > 0) {
+        photoForm?.requestSubmit();
+      }
+    });
+  }
+
   const burger = document.getElementById('navbarBurger');
   const mobileMenu = document.getElementById('mobileMenu');
 

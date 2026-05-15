@@ -6,9 +6,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="CinemaPlus.CinemaWebApp.Tests/**/*.cs" />
+    <Compile Remove="Tools/**/*.cs" />
     <Content Remove="CinemaPlus.CinemaWebApp.Tests/**/*" />
+    <Content Remove="Tools/**/*" />
     <EmbeddedResource Remove="CinemaPlus.CinemaWebApp.Tests/**/*" />
+    <EmbeddedResource Remove="Tools/**/*" />
     <None Remove="CinemaPlus.CinemaWebApp.Tests/**/*" />
+    <None Remove="Tools/**/*" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1">

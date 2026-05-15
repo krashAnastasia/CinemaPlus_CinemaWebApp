@@ -59,6 +59,8 @@ public class AdminController(
         ".ogv"
     ];
 
+    private const long MaxUploadedMediaBytes = 512L * 1024L * 1024L;
+
     [HttpGet("")]
     public IActionResult Index()
     {
@@ -1031,6 +1033,11 @@ public class AdminController(
             {
                 ModelState.AddModelError(nameof(model.PosterFile), "Файл постера порожній. Оберіть інший файл.");
             }
+
+            if (model.PosterFile.Length > MaxUploadedMediaBytes)
+            {
+                ModelState.AddModelError(nameof(model.PosterFile), "Файл постера перевищує ліміт у 512 МБ.");
+            }
         }
 
         if (model.TrailerFile is not null)
@@ -1044,6 +1051,11 @@ public class AdminController(
             if (model.TrailerFile.Length == 0)
             {
                 ModelState.AddModelError(nameof(model.TrailerFile), "Файл трейлера порожній. Оберіть інший файл.");
+            }
+
+            if (model.TrailerFile.Length > MaxUploadedMediaBytes)
+            {
+                ModelState.AddModelError(nameof(model.TrailerFile), "Файл трейлера перевищує ліміт у 512 МБ.");
             }
         }
     }

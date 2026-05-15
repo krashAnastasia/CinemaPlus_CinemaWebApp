@@ -15,6 +15,7 @@ public class RegistrationAndProfileFlowTests
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
 
         const string email = "integration.user@test.local";
+        const string updatedEmail = "updated.integration.user@test.local";
         const string password = "integration123";
 
         var registerPage = await client.GetStringAsync("/account/register");
@@ -39,12 +40,28 @@ public class RegistrationAndProfileFlowTests
         Assert.Contains("МІЙ КАБІНЕТ", profilePage);
         Assert.Contains(email, profilePage);
 
+        var profileEditToken = TestHtml.ExtractAntiForgeryToken(profilePage);
+        var updateProfileResponse = await client.PostAsync(
+            "/profile/edit",
+            new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["__RequestVerificationToken"] = profileEditToken,
+                ["FullName"] = "Оновлений Користувач",
+                ["Email"] = updatedEmail,
+                ["Phone"] = "+380991112233"
+            }));
+
+        Assert.Equal(HttpStatusCode.Redirect, updateProfileResponse.StatusCode);
+        Assert.Equal("/profile", updateProfileResponse.Headers.Location?.OriginalString);
+
         await using (var db = factory.CreateDbContext())
         {
-            var user = await db.Users.SingleAsync(item => item.Email == email);
+            var user = await db.Users.SingleAsync(item => item.Email == updatedEmail);
             Assert.Equal("Client", user.Role);
             Assert.NotEqual(password, user.PasswordHash);
             Assert.Contains("PBKDF2-SHA256", user.PasswordHash);
+            Assert.Equal("Оновлений Користувач", user.FullName);
+            Assert.Equal("+380991112233", user.Phone);
         }
 
         var logoutResponse = await client.GetAsync("/account/logout");
@@ -57,7 +74,7 @@ public class RegistrationAndProfileFlowTests
             new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 ["__RequestVerificationToken"] = loginToken,
-                ["Email"] = email,
+                ["Email"] = updatedEmail,
                 ["Password"] = password
             }));
 
@@ -66,6 +83,6 @@ public class RegistrationAndProfileFlowTests
 
         var secondProfilePage = await client.GetStringAsync("/profile");
         Assert.Contains("МІЙ КАБІНЕТ", secondProfilePage);
-        Assert.Contains(email, secondProfilePage);
+        Assert.Contains(updatedEmail, secondProfilePage);
     }
 }

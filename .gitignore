@@ -27,3 +27,7 @@ App_Data/reports/*
 
 TestResults/
 coverage/
+
+# Large files
+wwwroot/source/avatar_trailer.mov
+wwwroot/source/forrest-gump_trailer.mov

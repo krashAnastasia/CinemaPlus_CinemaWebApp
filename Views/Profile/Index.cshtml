@@ -17,9 +17,30 @@
             </div>
         }
 
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="form-validation-summary profile-page__error-message">
+                <p>@Model.ErrorMessage</p>
+            </div>
+        }
+
         <div class="profile-top">
-            <div class="profile-info" id="profile-card">
+            <div class="profile-info" id="profile-card" data-profile-root>
                 <div class="avatar-wrapper">
+                    <form asp-controller="Profile"
+                          asp-action="UpdateProfilePhoto"
+                          method="post"
+                          enctype="multipart/form-data"
+                          class="profile-photo-form"
+                          data-profile-photo-form>
+                        <input type="file"
+                               id="profilePhotoUpload"
+                               name="profilePhotoFile"
+                               accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                               class="profile-photo-form__input"
+                               data-profile-photo-input />
+                    </form>
+
                     @if (!Model.UseDefaultProfilePhoto && !string.IsNullOrWhiteSpace(Model.ProfilePhotoPath))
                     {
                         <img src="@Model.ProfilePhotoPath" alt="@Model.FullName" class="profile-photo" />
@@ -30,19 +51,51 @@
                             <i class="fa-solid fa-circle-user"></i>
                         </div>
                     }
-                    <a href="#profile-card" class="icon-btn avatar-edit" aria-label="Перейти до даних профілю">
+                    <label for="profilePhotoUpload" class="icon-btn avatar-edit" aria-label="Завантажити фото профілю">
                         <i class="fa-solid fa-pen"></i>
-                    </a>
+                    </label>
                 </div>
 
-                <article class="profile-card">
-                    <a href="#profile-card" class="icon-btn card-edit" aria-label="Переглянути дані профілю">
+                <article class="profile-card @(Model.IsEditingProfile ? "is-hidden" : null)" data-profile-display>
+                    <button type="button" class="icon-btn card-edit" aria-label="Редагувати дані профілю" data-profile-edit-open>
                         <i class="fa-solid fa-pen"></i>
-                    </a>
+                    </button>
                     <h2>@Model.FullName</h2>
                     <p class="profile-meta">@Model.Email</p>
-                    <p class="profile-meta">@Model.Phone</p>
+                    <p class="profile-meta">@Model.PhoneDisplay</p>
                 </article>
+
+                <form asp-controller="Profile"
+                      asp-action="UpdateProfile"
+                      method="post"
+                      class="profile-card profile-edit-card @(Model.IsEditingProfile ? "is-visible" : null)"
+                      data-profile-form
+                      novalidate>
+                    <div asp-validation-summary="ModelOnly" class="form-validation-summary"></div>
+
+                    <div class="profile-edit-card__field">
+                        <label asp-for="FullName" class="profile-edit-card__label">Ім'я та прізвище</label>
+                        <input asp-for="FullName" class="form-control profile-edit-card__input" />
+                        <span asp-validation-for="FullName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="profile-edit-card__field">
+                        <label asp-for="Email" class="profile-edit-card__label">Електронна пошта</label>
+                        <input asp-for="Email" class="form-control profile-edit-card__input" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="profile-edit-card__field">
+                        <label asp-for="Phone" class="profile-edit-card__label">Телефон</label>
+                        <input asp-for="Phone" class="form-control profile-edit-card__input" placeholder="+380..." />
+                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                    </div>
+
+                    <div class="profile-edit-card__actions">
+                        <button type="submit" class="button-primary profile-edit-card__action-btn">ЗБЕРЕГТИ</button>
+                        <button type="button" class="button-light profile-edit-card__action-btn" data-profile-edit-cancel>СКАСУВАТИ</button>
+                    </div>
+                </form>
             </div>
 
             <div class="profile-actions">

@@ -322,7 +322,13 @@ public class BookingAndSessionRulesTests
             new BookedSeat { BookingId = booking.Id, SessionId = session.Id, SeatId = seat2.Id });
         await db.SaveChangesAsync();
 
-        var controller = new ProfileController(db, TestControllerFactory.CreateEnvironment(), new BonusService(db));
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Storage:UploadsPath"] = Path.Combine(Path.GetTempPath(), "CinemaPlusProfileUploads")
+            })
+            .Build();
+        var controller = new ProfileController(db, configuration, TestControllerFactory.CreateEnvironment(), new BonusService(db));
         TestControllerFactory.AttachContext(controller, new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -340,5 +346,59 @@ public class BookingAndSessionRulesTests
         Assert.Equal("Cancelled", refreshedBooking.Status);
         Assert.Empty(refreshedBooking.BookedSeats);
         Assert.Equal(1, await db.NotificationLogs.CountAsync(item => item.BookingId == booking.Id));
+    }
+
+    [Fact]
+    public async Task UpdateProfilePhoto_SavesUploadedPhotoPath()
+    {
+        using var database = new SqliteTestDatabase();
+        await using var db = database.CreateContext();
+
+        var user = new User
+        {
+            FullName = "Photo Client",
+            Email = "photo.client@test.local",
+            Phone = "+380631234000",
+            PasswordHash = new Pbkdf2PasswordService().HashPassword("photo123"),
+            Role = "Client",
+            CreatedAt = DateTime.UtcNow
+        };
+
+        db.Users.Add(user);
+        await db.SaveChangesAsync();
+
+        var uploadsPath = Path.Combine(Path.GetTempPath(), "CinemaPlusProfileUploads", Guid.NewGuid().ToString("N"));
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Storage:UploadsPath"] = uploadsPath
+            })
+            .Build();
+
+        var controller = new ProfileController(db, configuration, TestControllerFactory.CreateEnvironment(), new BonusService(db));
+        TestControllerFactory.AttachContext(controller, new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.FullName),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, "Client")
+        });
+
+        await using var stream = new MemoryStream(new byte[] { 1, 2, 3, 4, 5 });
+        var formFile = new FormFile(stream, 0, stream.Length, "profilePhotoFile", "avatar.png")
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = "image/png"
+        };
+
+        var result = await controller.UpdateProfilePhoto(formFile);
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal("Index", redirect.ActionName);
+
+        var refreshedUser = await db.Users.SingleAsync(item => item.Id == user.Id);
+        Assert.StartsWith("/uploads/profile-", refreshedUser.ProfilePhotoPath);
+        Assert.True(Directory.Exists(uploadsPath));
+        Assert.Single(Directory.GetFiles(uploadsPath));
     }
 }

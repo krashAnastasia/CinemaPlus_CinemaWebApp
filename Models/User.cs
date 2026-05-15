@@ -10,6 +10,8 @@ public class User
 
     public string? Phone { get; set; }
 
+    public string? ProfilePhotoPath { get; set; }
+
     public string PasswordHash { get; set; } = string.Empty;
 
     public string Role { get; set; } = "Client";
